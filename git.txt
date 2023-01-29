@@ -1,0 +1,93 @@
+https://www.youtube.com/watch?v=VdGzPZ31ts8
+
+Usos de git:
+Historial de todo el trabajo realizado y de otros desarrolladores.
+Almacenar codigo.
+Trabajar en equipo sin compartir los cambios.
+Permite saber cuando se introdujo un error en el codigo.
+
+CONFIGURACION:
+git --version -> saber que version tengo.
+git config --global user.name "Martin antonovich" -> configuro git 
+con mi nombre
+git config --global user.email martin@gmail -> igual con mail
+git config --global core.editor "code --wait" -> asocia a vsc
+git config --global -e -> se abre el archivo en vsc
+git config --global core.auttocrlf true
+git config -h -> para ver todas las opciones de configuracion
+
+ls -> listar el directorio
+pwd -> directorio donde me encuentro
+cd -> moverse por carpetas
+cd user -> accede al directorio users
+cd .. -> vuelve un directorio atras
+mkdir nueva -> crea una carpeta nueva
+git init -> inicializar un proyecto (aparece oculto).
+ls -a -> para mostrarlo.
+cd .git -> ingreso a la carpeta git
+ls -a -> veo ahora lo que hay dentro de la carpeta de git
+
+Flujo de trabajo que debemos seguir:
+1. trabajando en el computador, vamos a poder empezar a agregar y
+modificar todos los archivos que queramos. 
+Para poder a agregar a un repositorio tendremos que utilizar:
+2. git add -> seleccionar los archivos que queramos pasar a la etapa
+STAGE. Cuando los agregamos a esta etapa, verificamos todos los 
+cambios que queremos eventualmente pasar al repositorio. 
+3. En la etapa de STAGE, no necesariamente se vera reflejado en el
+repositorio. Es una etapa intermedia para indicar los cambios. 
+No pasan todos, solo los que seleccionemos.
+Si no queremos pasar algunos cambios al repositorio, ejecutamos:
+4. git commit -> pasamos los archivos de STAGE a COMMIT.
+5. Ultima etapa opcional pero que se hace siempre, pasar los cambios
+a un server. 
+6. Si eliminamos un archivo ejecutamos git add.
+
+code . -> abrir editor de texto
+git status -> muestra estado actual del repositorio.
+por defecto, git no sigue todos los archivos "untracked files".
+Para seleccionarlos:
+git add arch1.txt -> agrega el archivo arch1.txt
+git add *.txt -> agrega a todos los .txt
+git add . -> agrega a todos los archivos
+Ahora si, queda listo el archivo para pasar a commit. Estan en 
+STAGE ya modificados.
+Ahora lo comprometemos (con commit).
+Ahora ELIMINO ARCHIVOS.
+rm arch2.txt -> se realiza el cambio
+git add arch2.txt -> guardo el cambio en la etapa de STAGE
+git commit -m "Eliminando archivo 2" -> comprometo el cambio
+Quedo borrado.
+Sino comando: git rm arch2.txt (ahorro un paso)
+Para RESTAURAR un archivo:
+git restore --staged arch2.txt -> ya no se encuentra en STAGE
+git restore arch2.txt -> Recupero el archivo.
+mv arch1.txt arch.txt -> cambio el nombre.
+git add arch1.txt arch.txt -> Cambio de nombre en STAGE.
+git commit -m "renombrando archivo" -> lo comprometo.
+mas facil:
+git mv arch.txt arch1.txt
+y lo vuelvo a comprometer.
+
+Para no subir al repositorio: ej contrasena etc
+creo un archivo en vsc .env
+en status aparece pero no lo quiero comprometer.
+Creo un nuevo archivo en vsc llamado .gitignore
+en el archivo le indico .env , tambien le puedo indicar carpetas.
+git add .gitignore -> pasa a etapa STAGE.
+git commit -m "agrego gitignore" -> comprometo ese archivo y no .env
+
+Ver historial:
+git log --oneline -> muestra los nombres de los commit (tienen que ser claros)
+
+Cuando hay mas de 1 desarrollador se abren nuevas ramas, por lo tanto,
+hay que hacer un Merge para unifiar el codigo.
+git branch -> Me indica en que rama me encuentro.
+git checkout -b nombre-de-rama -> Cambio la rama en la que me encuentro.
+Para traer los cambios a la rama principal, en la principal tengo que 
+git merge ramab -> trae los cambios.
+cat arch1.txt -> muestra el contenido de arch1.txt
+
+
+Para subir a la web, hay que hacer git add git commit etc y dsps git push.
+Para subir nueva rama a git sin merge, git push -u origin ramaC
