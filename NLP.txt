@@ -1,0 +1,58 @@
+Natural Language Processing.
+
+Es el método de inteligencia artificial que se comunica con un sistema inteligente,
+usando lenguaje natural.
+Es el campo de estudio que se enfoca en la comprensión mediante ordenador del lenguaje humano. 
+Abarca parte de la Ciencia de Datos, Inteligencia Artificial (Aprendizaje Automático) y la lingüística.
+Codificar palabras/caracteres
+Una red neuronal solo procesa numeros.
+Cada bloque que conforma la secuencia de datos (palabras, caracteres o subpalabras),
+se lo denomina TOKEN. Y al proceso de división, TOKENIZACIÓN. 
+One-Hot Encoding cada palabra es un vector. Todas estan en 0 excepto la palabra que quiero representar.
+Embedings: Las palabras similares tienen una distancia mas corta a las distintas.
+Necesito que la red aprenda a comprimir el texto.
+Embedding: Comprimir vectores de one'hot encoding a una representacion mas compacta para resolver la tarea.
+Si tenemos un modelo pre-entrenado se facilita el proceso.
+
+NLTK natural language ToolKit
+Es una plataforma líder para crear programas de Python para trabajar con datos de lenguaje humano.
+
+Ejemplos:
+Tokenize y etiquete algún texto:
+>>> import nltk
+>>> sentence = """At eight o'clock on Thursday morning
+... Arthur didn't feel very good."""
+>>> tokens = nltk.word_tokenize(sentence)
+>>> tokens
+['At', 'eight', "o'clock", 'on', 'Thursday', 'morning',
+'Arthur', 'did', "n't", 'feel', 'very', 'good', '.']
+>>> tagged = nltk.pos_tag(tokens)
+>>> tagged[0:6]
+[('At', 'IN'), ('eight', 'CD'), ("o'clock", 'JJ'), ('on', 'IN'),
+('Thursday', 'NNP'), ('morning', 'NN')]
+
+Identificar entidades nombradas:
+>>> entities = nltk.chunk.ne_chunk(tagged)
+>>> entities
+Tree('S', [('At', 'IN'), ('eight', 'CD'), ("o'clock", 'JJ'),
+           ('on', 'IN'), ('Thursday', 'NNP'), ('morning', 'NN'),
+       Tree('PERSON', [('Arthur', 'NNP')]),
+           ('did', 'VBD'), ("n't", 'RB'), ('feel', 'VB'),
+           ('very', 'RB'), ('good', 'JJ'), ('.', '.')])
+
+Mostrar un árbol de análisis:
+>>> from nltk.corpus import treebank
+>>> t = treebank.parsed_sents('wsj_0001.mrg')[0]
+>>> t.draw()
+
+GPT-3
+Modelo del Lenguaje. 
+Entrenada para secuencia de texto que el usuario puede suministrar,
+la máquina aprenda como tiene que seguir completandolo.
+
+Para integrarlo en python:
+seleccionar "View code"
+pip install openai
+ingresar: openai.api_key = pass
+Para encontrar la pass: seleccionar api keys
+crear una pass y copiarla.
