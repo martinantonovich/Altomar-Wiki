@@ -56,5 +56,3 @@ pip install openai
 ingresar: openai.api_key = pass
 Para encontrar la pass: seleccionar api keys
 crear una pass y copiarla.
-
-haciendo cambios
