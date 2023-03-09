@@ -1,0 +1,181 @@
+Spacy es un paquete moderno de Python para hacer NLP (procesamiento de lenguaje natural) 
+de potencia industrial.
+Construir sistemas avanzados de comprensión del lenguaje natural usando enfoques basados 
+en reglas y en machine learning.
+
+En el centro de Spacy está el objeto que contiene el pipeline de procesamiento.
+Se le llama nlp. 
+-> from spacy.lang.es import Spanish
+-> nlp = Spanish()
+
+Se puede usar el objeto NLP como una función para analizar el texto.
+Cuando procesas un String de texto con el objeto NLP, Spacy crea un Doc.
+El doc se comporta como una secuencia normal de Python y te permite iterar sobre sus tokens u obtener 
+un token con su índice.
+Los objetos Token representan a los tokens en un documento.
+Para obtener el token en una posición especifica uso el índice del doc:
+-> token = doc[2]
+Los objetos Token proveen varios atributos que permiten acceder a más información
+sobre los tokens. Por ejemplo, el atributo .text devuelve el texto del token. 
+Un objeto Span es un slice de un doumento compuesto por uno  o más tokens.
+Es solo un View de un doc y no contiene los datos en sí.
+Para crear un Span puedo usar a notación de slice de Python.
+Por ejemplo: 2:4 crea un slice que comienza en la posición 2 hasta pero no incluyendo
+el token en la posción 4.
+
+El matcher permite escribir reglas para encontrar palabras y frases en el texto.
+El matcher funciona con objetos Doc y Token, en vez de unicamente strings.
+Es mas flexible, puedo buscar textos, pero tambien otros atributos lexicos.
+Incluso puedo escribir reglas que usen las predicciones del modelo.
+Por ejemplo, encontrar la palabra "araña" que sea un verbo y no un sustantivo.
+Los match patterns son listas de diccionarios. Cada diccionario describe un token.
+Los Keys son los nombres de atributos del token, mapeados a sus valores esperados.
+
+Vocabulario compartido y cómo SpaCy maneja los strings:
+SpaCy guarda todos los datos en un vocabulario, el vocab.
+Incluye palabras, pero también los esquemas de labels para tags y entidades.
+Para usar menos memoria, todos los strings son codificados a hash IDs. Si una palabra 
+ocurre multiples veces, no tenemos que guardarla cada vez. En cambio, SpaCy usa una 
+función hash para generar un ID y guardar el string una vez en el string store. El string 
+store está disponible como nlp.vocab.strings 
+Es un lookup table que funciona en ambas direcciones: Buscas string y obtenes hash o buscar
+hash y obtener string. Internamente SpaCy solo se comunica en hash IDs.
+Los hash IDs no se pueden revertir. Si una palabra no está en el vocabulario no hay forma
+de obtener su string. Es por esto que siempre tenemos que pasar el vocabulario compartido.
+Para obtener el hash de un string podemos buscarlo en nlp.vocab.strings
+Para obtener el string que representa a un hash podemos buscar con el hash.
+Un objeto Doc también expone su vocabulario y strings. Los lexemas son entradas en el 
+vocabulario independientes del contexto. Puedo obtener un lexema buscando un string o un 
+hash ID en el vocabulario. Los lexemas exponen atributos al igual que los tokens. Contienen 
+información sobre una palabra independiente del contexto, como el texto o si la palabra está 
+compuesta por caracteres alfanuméricos. Los lexemas no tienen part-of-speech tags, dependencies
+o entity labels, ya que esos dependen del contexto. 
+
+Estructuras de datos: Doc y sus views, el Token y Span.
+El Doc es una de las estructuras de datos centrales de SpaCy. Es creado automáticamente cuando 
+procesas un texto con el objeto NLP. Pero también se puede crear un instance manualmente.
+Después de crear el objeto NLP puedo importar la clase Doc desde spacy.tokens
+Creo un Doc a partir de 3 palabras. Los espacios son una lista de valores booleanos que indican
+si una palabra está seguida por un espacio. Cada Token incluye esa información, inclusive 
+el último. La clase Doc recibe 3 argumentos: el vocabulario compartido, las palabras y los espacios.
+Un Span es un slice del Doc que está formado por uno o más Tokens. El Span recibe al menos 3 argumentos:
+el Doc al que se refiere, el índice de inicio y el índice del final del Span. El índice final 
+EXCLUYENTE. Para crear Span manualmente puedo importar la clase desde spacy.tokens
+Puedo crear un instance con el Doc y los índices de inicio y final, así como un argumento opcional
+de label. Los doc.ents son escribibles así que podemos añadir entidades manualmente sobreescribiéndolos
+con una lista de Spans. El Doc y el Span son muy poderosos y eficientes. Dan acceso a todas las 
+referencias y relaciones de las palabras y frases. 
+Si tengo que generar strings debo convertir el Doc lo más tarde posible así no pierdo las relaciones
+entre los tokens. Para mantener la consistencia intento usar los atributos incluidos de los tokens, siempre
+que sea posible. Por ejemplo, token.i para el índice del token. Tampoco olvidar de pasar el vocabulario
+compartido siempre. 
+
+Predecir que tan similares son documentos, spans o tokens entre si.
+Como usar word vectors y como aprovecharlos en la aplicacion de NLP.
+SpaCy puede comparar 2 objetos y predecir que tan similares son. Por ejemplo, documentos, spans o tokens.
+Tienen un metodo .similarity que recibe otro objeto y devuelve un numero de punto flotante entre 0 y 1 
+indicando que tan similares son. Para poder usar .simility necesito un modelo mas grande de SpaCy que 
+incluya los word vectors. (Hay que usar modelo que termina en md o lg: en_core_web_md).
+La similitud se determina usando word vectors, que son representaciones multidimensionales de los 
+significados de las palabras. word2vec es un algoritmo frecuentemente utilizado para entrenar vectores de 
+palabras desde texto puro.
+Los vectores se pueden anadir a los modelos estadisticos de SpaCy. 
+La similitud que devuelve es una similitud coseno entre dos vectores, pero puede cambiarse si es necesario.
+Los vectores para objetos que consisten de varios tokens, como el Doc y el Span tienen por defecto el valor 
+promedio de los vectores de sus tokens.
+
+Combinar modelos estadisticos con sistemas basados en reglas es uno de los trucos mas poderosos que tiene NLP.
+Los modelos estadisticos son utiles si la aplicacion necesita poder generalizar basada en pocos ejemplos.
+Por ejemplo, detectar nombres de productos o personas normalmente se beneficia de un modelo estadístico.
+En vez de proveer una lista de todos los nombres de personas, la aplicacion deberia poder predecir si un span de tokens es un nombre de persona o no. Del mismo modo, puedo predecir dependency labels para encontrar 
+relaciones de sujeto/objeto. Para hacer esto, usaria el entity recognizer, el dependency parser o el 
+part-of-speech tagger de SpaCy. 
+Los enfoques basados en reglas son muy utiles si hay un numero mas o menos finito de casos que quiero encontrar.
+Por ejemplo, todos los paises o ciudades del mundo, nombre de drogas o inclusive razas de perros.
+En SpaCy puedo lograr esto con una regla de tokenizacion personalizada, asi como el matcher y el phrase matcher.
+El phrase matcher es otra herramienta util para encontrar secuencias de palabras en mis datos. Hace una búsqueda de keyword en el documento pero en vez de encontrar únicamente strings, da acceso directo a los tokens en contexto. Toma los objetos Doc como patrones y también es muy rápido. Esto hace que sea muy útil para encontrar diccionarios grandes y listas de palabras en grandes vólumenes de texto. 
+Ejemplo cap 2 ejercicio 13:
+pattern1 = [{"LOWER": "amazon"}, {"IS_TITLE": True, "POS": "PROPN"}]
+pattern2 = [{"LOWER": "ad"}, {"TEXT": "-"}, {"LOWER": "free"}, {"POS": "NOUN"}]
+
+Capitulo 3:
+Dedicado a los pipelines de procesamiento: una serie de funciones que se aplican a un doc para añadir atributos como part-of-speech tags, dependency labels o entidades nombradas. 
+Le paso un string de texto al objeto NLP y recibo un objecto Doc.Qué hace el objeto NLP? 
+Primero se aplica el tokenizer para convertir el string de texto a un objeto Doc.
+A continuación, una serie de componentes del pipeline se aplican al Doc en orden. En este caso, el tagger, luego el parser, luego el entity  recognizer. Finalmente, el Doc procesado es devuelto para que pueda trabajar con él. SpaCy viene con los siguientes componentes incluidos en su pipeline. El part-of-speech tagger añade los atributos token.tag y token.pos. El dependency parser añade los atributos token.dep y token.head y es responsable de detectar frases y los base noun phrases, también conocidos como "noun chunks". El named entity recognizer añade las entidades detectadas a la propiedad doc.ents. También escribe los atributos del tipo de entidades en los tokens, lo que indica si un token es parte de una entidad o no. Finalmente el text classifier escribe las labels de categoría que aplican a todo el texto y las añade a la propiedad doc.cats. Debido a que las categorías de texto son siempre muy específicas, el text classifier no está incluido en los modelos pre-entrenados por defecto. Pero lo puedo usar para entrenar mi propio sistema. Todos los modelos que puedo cargar en SpaCy incluyen archivos y un meta.json. El meta define cosas como el lenguaje y el pipeline. Esto le deja saber a Spacy cuáles son los componentes a los que les debe hacer un instance. Los componentes incluidos que hacen predicciones también necesitan datos binarios. Los datos se incluyen en el paquete del modelo y se cargan al componente cuando cargas el modelo. Para ver los nombres de los componentes del pipeline que están en el objeto nlp actual puedo usar el atributo nlp.pipe_names. Para una lista de tuples con los nombres y funciones de cada componente usa el atributo nlp.pipeline. Las funciones de los componentes son aquellas funciones que se aplican al Doc para procesarlos y añadir atributos, por ejemplo, part-of-speech tags o entidades nombradas. 
+Componentes personalizados para el pipeline:
+Los componentes personalizados del pipeline me permiten añadir mi propia función al pipeline de SpaCy que se ejecuta cuando llamo al objeto nlp sobre un texto, por ejemplo, para modificar el Doc y añadirle más datos. Después de que el texto es convertido en tokens y un objeto Doc ha sido creado, los componentes del pipeline se aplican en orden. SpaCy ofrece soporte para un rango de componentes incluidos, pero también me permite definir los míos. 
+Los componentes personalizados se ejecutan automáticamente cuando llamo al objeto NLP sobre un texto. Son especialmente útiles para añadir tus propios metadatos a los documentos y a los tokens. Tambíen puedo usarlos para actualizar los atributos incluidos, como los spans de las entidades nombradas. Fundamentalmente, un componente del pipeline es una función o un callable (llamable?) que toma a un Doc, lo modifica y lo devuelve para que pueda ser procesado por el proximo componente en  el pipeline. Los componentes pueden ser añadidos al pipeline usando el método nlp.add_pipe. Éste toma al menos un argumento: la función del componente. Para especificar dónde añadir el componente en el pipeline, puedo usar uno de los siguientes argumentos keyword: si hago que el valor de last sea True, se añadirá el componente en el último lugar del pipeline. Este es el comportamiento por defecto. Si hago que el valor de first sea True, se añadirá en el primer lugar del pipeline justo después del tokenizer. Los argumentos before y after me permiten definir el nombre de un componente existente al que le puedo añadir el nuevo componente antes o después. Por ejemplo, before="ner" añadirá el nuevo componente antes del named entity recognizer. Sin embargo, el otro componente al que se le añadirá un nuevo componente antes o después tiene que existir. Si no, SpaCy arrojará un error. 
+
+Ejemplo componente personalizado que se usa el PhraseMatcher para encontrar nombre de animales en el documento y los resultados al doc.ents. Un PhraseMatcher con los patrones de animales ya fue creado con la variable "matcher".
+ 
+import spacy
+from spacy.language import Language
+from spacy.matcher import PhraseMatcher
+from spacy.tokens import Span
+
+nlp = spacy.load("en_core_web_sm")
+animals = ["Golden Retriever", "cat", "turtle", "Rattus norvegicus"]
+animal_patterns = list(nlp.pipe(animals))
+print("animal_patterns:", animal_patterns)
+matcher = PhraseMatcher(nlp.vocab)
+matcher.add("ANIMAL", animal_patterns)
+
+# Define the custom component
+@Language.component("animal_component")
+def animal_component_function(doc):
+    # Apply the matcher to the doc
+    matches = matcher(doc)
+    # Create a Span for each match and assign the label "ANIMAL"
+    spans = [Span(doc, start, end, label="ANIMAL") for match_id, start, end in matches]
+    # Overwrite the doc.ents with the matched spans
+    doc.ents = spans
+    return doc
+# Add the component to the pipeline after the "ner" component
+nlp.add_pipe("animal_component", after="ner")
+print(nlp.pipe_names)
+# Process the text and print the text and label for the doc.ents
+doc = nlp("I have a cat and a Golden Retriever")
+print([(ent.text, ent.label_) for ent in doc.ents])
+
+Cómo añadir atributos personalizados para los objetos Doc, Token y Span para guardar datos específicos a mis necesidades. Los atributos personalizados me permiten añadir metadatos a los docs, tokens y spans. Los datos pueden ser añadidos una vez, o calculados dinámicamente. Los atributos personalizados están disponibles a través de la propiedad ._ 
+Esta notación hace que sea claro que fueron agregados por el usuario y no están integrados en SpaCy como token.text. Los atributos tienen que ser registrados en las clases Doc, Token y Span globales que puedo importar desde spacy.tokens. Para registrar un atributo personalizado en los Doc, Token y Span, puedo usar el método set_extension. El primer argumento es el nombre del atributo. Los argumentos keyword me permiten definir cómo debe ser calculado el valor. En este caso, tienen un valor por defecto y puede ser sobreescrito.
+Hay 3 tipos de extensión: extensión de atributos, extensión de propiedades y extensión de métodos. Las extensiones de atributo añaden un valor por defecto que puede ser sobreescrito. Por ejemplo, un atributo personalizado del token, llamado is_color, que tiene por defecto el valor False. En tokens individuales su valor puede ser cambiado cuando se sobreescribe. Las extensiones de propiedades funcionan como las propiedades de Python: pueden definir una función getter y una función setter opcional. La función getter solo es llamada cuando consulto el atributo. Esto me permite calcular el valor dinámicamente, e inclusive puede tener en cuenta otros atributos personalizados. Las funciones getter toman un argumento: el objeto, en este caso el token. En este ejemplo, la función devuelve si el texto de un token se encuentra en mi lista de colores. Puedo proveer la función mediante el argumento keyword getter cuando registro la extensión. El token "azul" ahora devuelve True ._.is_color. 
+
+from spacy.tokens import Token
+#Define la función getter
+def get_is_color(token):
+colors = ["rojo","amarillo","azul"]
+return token.text in colors
+#Añade una extensión en el Token con getter
+Token.set_extension("is_color", getter=get_is_color)
+doc = nlp("El cielo es azul.")
+print(doc[3]._.is_color, "-", doc[3].text)
+
+Si quiero añadir extensiones de atributos en un Span, casi siempre debo usar una extensión de propiedades con un getter. De otra manera, tendría que actualizar a mano cada uno de los spans posibles para añadir todos los valores. 
+
+Cómo hacer para que el pipeline de SpaCy corra lo más rápido posible y procese grandes volúmenes de texto de manera eficiente. Si necesito procesar una gran cantidad de textos y crear muchos objetos Doc seguidos, el método nlp.pipe puede acelerar este proceso de manera significativa. Procesa los textos como un stream y usa yield para devolver objetos Doc. Es mucho más rápido que solo llamar al objeto nlp sobre cada texto, porque procesa en baches los textos. nlp.pipe es un generador que usa yield para devolver objetos Doc, así que para obtener una lista de Doc, recordar llamar a la función list sobre él. nlp.pipe también provee soporte para pasar tuples de texto/contexto si defino as_tuples como True. El método entonces usará yield para devolver tuples de doc/contexto. Esto es útil para pasar metadatos adicionales, como un ID asociado con el texto o con el número de página. Inclusive puedo pasarle metadatos a los atributos personalizados. 
+Un escenario común: a veces ya tengo el modelo cargado para hacer otro procesamiento, pero solo necesito el tokenizer para un texto en particular. Correr todo el pipeline es innecesariamente lento, porque estaré obteniendo un montón de predicciones del modelo que no necesito. Si solo necesito un objeto Doc que fue convertido en tokens puedo usar el método nlp.make_doc en vez de nlp. nlp.make_doc toma un texto y devuelve un doc. 
+SpaCy lo que hace es: nlp.make_doc convierte el texto en un doc 
+
+
+
+
+Siempre que trabajemos con SpaCy debemos descargar el modelo del idioma a trabajar.
+-> nlp = spacy.load('es_core_news_sm') # hay que descargarlo previamente en cmd.
+-> spacy downloads 0es_core_news_sm
+-> type(nlp) #muestra el tipo
+-> for elemento in documento:
+        print(elemento) 
+	# recorre el documento.
+
+-> for elemento in documento:
+        print(elemento, elemento.pos_)
+	# recorre y muestra sus elemetos su descripcion. con print(spacy.explain('NOUN'))
+
+-> for oracion in documento.sents:
+    print(oracion)
+    print('-')
+	# separa las oraciones del documento.
+
+# Tokenizacion:
